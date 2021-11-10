@@ -1,0 +1,139 @@
+<html>
+    <head>
+        <title>Particles :: eduvallve</title>
+    </head>
+    <body onload="sizing()" onresize="sizing()" style="margin: 0px;">
+        <canvas id="canvas"></canvas>
+        <style> 
+        #canvas{
+            width:100%;
+        }
+        .text {
+            position: absolute;
+            bottom: 4em;
+            left: 4em;
+            padding: 1em 2em 3em 2em;
+            background: #00000060;
+            font-family: montserrat;
+            color: white;
+            border-radius: 3px;
+        }
+        </style>
+        <script>
+            function sizing(){
+                let canvas = document.querySelector('canvas');
+                canvas.setAttribute('width',window.innerWidth);
+                canvas.setAttribute('height',window.innerHeight);
+                console.log(canvas.getAttribute('width'));
+            }
+        </script>
+        <script>
+            let canvas = document.querySelector('canvas');
+            let context = canvas.getContext('2d');
+
+            const agents = [];
+
+            class Vector {
+                constructor(x, y){
+                    this.x = x;
+                    this.y = y;
+                }
+                getDistance(v){
+                    const dx = this.x - v.x;
+                    const dy = this.y - v.y;
+                    return Math.sqrt(dx * dx + dy * dy);
+                }
+            }
+
+            class Agent {
+                constructor(x,y){
+                    this.pos = new Vector(x, y);
+                    this.vel = new Vector(Math.random(-10,10),Math.random(-10,10));
+                    width = window.innerWidth;
+                    this.radius = Math.random() * ((width/1000)*4 - (width/1000)*1) + (width/1000)*1;
+                }
+
+                update(){
+                    this.pos.x += this.vel.x;
+                    this.pos.y += this.vel.y;
+                }
+
+                draw(context){
+
+                    context.save();
+                    context.translate(this.pos.x, this.pos.y);
+                    context.lineWidth = 4;
+                    context.beginPath();
+                    context.arc(0, 0, this.radius, 0, Math.PI*2);
+                    context.fill();
+                    context.stroke();
+                    context.restore();
+                }
+
+                bounce(width,height){
+                    if(this.pos.x <= 0 || this.pos.x >= width) { this.vel.x *= -1; }
+                    if(this.pos.y <= 0 || this.pos.y >= height){ this.vel.y *= -1; } 
+                }
+            }
+
+            function animate(){
+                
+                atributs(context, width, height);
+                requestAnimationFrame(animate);
+            }
+
+            function atributs (context) {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                context.fillStyle = 'white';
+                context.fillRect(0, 0, width, height);
+
+                for(let i = 0; i< agents.length; i++){
+                const agent = agents[i];
+                for(let j = i + 1; j< agents.length; j++){
+                    const other = agents[j];
+                    const dist = agent.pos.getDistance(other.pos);
+                    if(dist > (width/10)*1) continue;
+                    context.beginPath();
+                    context.moveTo(agent.pos.x, agent.pos.y);
+                    context.lineTo(other.pos.x, other.pos.y);
+                    context.stroke();
+                } 
+                }
+
+                agents.forEach(agent => {
+                agent.update();
+                agent.draw(context);
+                agent.bounce(width,height);
+                });
+            };
+            
+            function sketch(context) {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                
+                for(let i = 0; i < 60; i++){
+                    const x = Math.random(0,width) * width;
+                    const y = Math.random(0,height) * height;
+                    agents.push(new Agent(x,y));
+                }
+                
+                atributs(context);
+                
+            };
+            
+            /* Accions: crea els Agents i anima'ls */
+            sketch(context);
+            animate();
+            
+            
+            
+        </script>
+
+        <div class="text">
+            <h1>Particles</h1>
+            <desc>First experiment with particles in Canvas and HTML5.</desc><br><br>
+            <sign>- eduvallve</sign>
+        </div>
+    </body>
+</html>
